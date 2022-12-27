@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useFetcher,
   useLoaderData,
 } from '@remix-run/react'
 import {createBrowserClient} from '@supabase/auth-helpers-remix'
@@ -45,9 +46,28 @@ export async function loader({request}: LoaderArgs) {
 export default function App() {
   const {env, session} = useLoaderData<typeof loader>()
 
+  const fetcher = useFetcher()
+
   const [supabase] = React.useState(() =>
     createBrowserClient<Database>(env.SUPABASE_URL!, env.SUPABASE_ANON_KEY!),
   )
+
+  const serverAcessToken = session?.access_token
+
+  React.useEffect(() => {
+    const {
+      data: {subscription},
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token !== serverAcessToken) {
+        // call loaders
+        fetcher.submit(null, {method: 'post', action: '/handle-supabase-auth'})
+      }
+    })
+
+    return () => {
+      subscription?.unsubscribe()
+    }
+  }, [serverAcessToken, supabase, fetcher])
 
   return (
     <html lang="en">
