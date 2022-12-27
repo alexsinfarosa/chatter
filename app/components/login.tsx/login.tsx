@@ -7,7 +7,6 @@ export default function Login() {
   async function handleLogin() {
     const {error} = await supabase.auth.signInWithOAuth({
       provider: 'github',
-      redirectTo: '/',
     })
 
     if (error) {
