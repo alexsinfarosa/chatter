@@ -17,7 +17,6 @@ export default function RealtimeMessages({
     setMessages(serverMessages)
   }, [serverMessages])
 
-
   React.useEffect(() => {
     const channel = supabase
       .channel('*')
@@ -26,7 +25,7 @@ export default function RealtimeMessages({
         {event: 'INSERT', schema: 'public', table: 'message'},
         payload => {
           const newMessage = payload.new as Message
-          if(!messages.find(m => m.id === newMessage.id){
+          if (!messages.find(m => m.id === newMessage.id)) {
             setMessages(messages => [...messages, newMessage])
           }
         },
